@@ -33,17 +33,16 @@ QVector<Detection> Inference::runInference(const cv::Mat &input)
         dimensions = temp;
     }
 
-    float *data = (float *)outputs[0].data;
 
-    float *transposedData = nullptr;
+
     if (yolov8)
     {
-        transposedData = new float[dimensions * rows];
-        for (int i = 0; i < dimensions; i++)
-            for (int j = 0; j < rows; j++)
-                transposedData[j * dimensions + i] = data[i * rows + j];
-        data = transposedData;
+        outputs[0] = outputs[0].reshape(1, dimensions);
+        cv::transpose(outputs[0], outputs[0]);
+
     }
+
+    float *data = (float *)outputs[0].data;
 
     // qDebug() << "Dimensions:" << dimensions;
     // qDebug() << "Rows:" << rows;
@@ -94,9 +93,6 @@ QVector<Detection> Inference::runInference(const cv::Mat &input)
 
         data += dimensions;
     }
-
-    if (transposedData != nullptr)
-        delete[] transposedData;
 
     std::vector<int> nms_result;
     cv::dnn::NMSBoxes(boxes, confidences, modelScoreThreshold, modelNMSThreshold, nms_result);
