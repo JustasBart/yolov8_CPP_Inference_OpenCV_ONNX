@@ -1,15 +1,11 @@
 #ifndef INFERENCE_H
 #define INFERENCE_H
 
-// Qt includes
-#include <QRandomGenerator>
-#include <QObject>
-#include <QDebug>
-#include <QColor>
-#include <QFile>
-
 // Cpp native
 #include <fstream>
+#include <vector>
+#include <string>
+#include <random>
 
 // OpenCV / DNN / Inference
 #include <opencv2/imgproc.hpp>
@@ -19,7 +15,7 @@
 struct Detection
 {
     int class_id{0};
-    QString className{};
+    std::string className{};
     float confidence{0.0};
     cv::Scalar color{};
     cv::Rect box{};
@@ -28,26 +24,26 @@ struct Detection
 class Inference
 {
 public:
-    Inference(const QString &onnxModelPath, const cv::Size2f &modelInputShape, const QString &classesTxtFile, const bool &runWithCuda = true);
-    QVector<Detection> runInference(const cv::Mat &input);
+    Inference(const std::string &onnxModelPath, const cv::Size2f &modelInputShape, const std::string &classesTxtFile, const bool &runWithCuda = true);
+    std::vector<Detection> runInference(const cv::Mat &input);
 
 private:
     void loadClassesFromFile();
     void loadOnnxNetwork();
     cv::Mat formatToSquare(const cv::Mat &source);
 
-    QString modelPath{};
-    QString classesPath{};
+    std::string modelPath{};
+    std::string classesPath{};
     bool cudaEnabled{};
 
-    QVector<QString> classes{};
+    std::vector<std::string> classes{};
     cv::Size2f modelShape{};
 
     float modelConfidenseThreshold {0.25};
     float modelScoreThreshold      {0.45};
     float modelNMSThreshold        {0.50};
 
-    bool letterBoxForSquare = true;
+    bool letterBoxForSquare = false;
 
     cv::dnn::Net net;
 };

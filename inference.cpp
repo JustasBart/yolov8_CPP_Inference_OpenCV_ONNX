@@ -1,6 +1,6 @@
 #include "inference.h"
 
-Inference::Inference(const QString &onnxModelPath, const cv::Size2f &modelInputShape, const QString &classesTxtFile, const bool &runWithCuda)
+Inference::Inference(const std::string &onnxModelPath, const cv::Size2f &modelInputShape, const std::string &classesTxtFile, const bool &runWithCuda)
 {
     modelPath = onnxModelPath;
     modelShape = modelInputShape;
@@ -11,7 +11,7 @@ Inference::Inference(const QString &onnxModelPath, const cv::Size2f &modelInputS
     loadClassesFromFile();
 }
 
-QVector<Detection> Inference::runInference(const cv::Mat &input)
+std::vector<Detection> Inference::runInference(const cv::Mat &input)
 {
     cv::Mat modelInput = input;
     if (letterBoxForSquare && modelShape.width == modelShape.height)
@@ -86,7 +86,7 @@ QVector<Detection> Inference::runInference(const cv::Mat &input)
     std::vector<int> nms_result;
     cv::dnn::NMSBoxes(boxes, confidences, modelScoreThreshold, modelNMSThreshold, nms_result);
 
-    QVector<Detection> detections{};
+    std::vector<Detection> detections{};
     for (unsigned long i = 0; i < nms_result.size(); ++i)
     {
         int idx = nms_result[i];
@@ -94,9 +94,14 @@ QVector<Detection> Inference::runInference(const cv::Mat &input)
         Detection result;
         result.class_id = class_ids[idx];
         result.confidence = confidences[idx];
-        result.color = cv::Scalar(QRandomGenerator::global()->generate() % 255,
-                                  QRandomGenerator::global()->generate() % 255,
-                                  QRandomGenerator::global()->generate() % 255);
+
+        std::random_device rd;
+        std::mt19937 gen(rd());
+        std::uniform_int_distribution<int> dis(0, 255);
+        result.color = cv::Scalar(dis(gen),
+                                  dis(gen),
+                                  dis(gen));
+
         result.className = classes[result.class_id];
         result.box = boxes[idx];
 
@@ -108,31 +113,28 @@ QVector<Detection> Inference::runInference(const cv::Mat &input)
 
 void Inference::loadClassesFromFile()
 {
-    QFile inputFile(classesPath);
-    if (inputFile.open(QIODevice::ReadOnly))
+    std::ifstream inputFile(classesPath);
+    if (inputFile.is_open())
     {
-        QTextStream in(&inputFile);
-        while (!in.atEnd())
-        {
-            QString classLine = in.readLine().simplified();
+        std::string classLine;
+        while (std::getline(inputFile, classLine))
             classes.push_back(classLine);
-        }
         inputFile.close();
     }
 }
 
 void Inference::loadOnnxNetwork()
 {
-    net = cv::dnn::readNetFromONNX(modelPath.toStdString());
+    net = cv::dnn::readNetFromONNX(modelPath);
     if (cudaEnabled)
     {
-        qDebug() << "\nRunning on CUDA\n";
+        std::cout << "\nRunning on CUDA" << std::endl;
         net.setPreferableBackend(cv::dnn::DNN_BACKEND_CUDA);
         net.setPreferableTarget(cv::dnn::DNN_TARGET_CUDA);
     }
     else
     {
-        qDebug() << "\nRunning on CPU\n";
+        std::cout << "\nRunning on CPU" << std::endl;
         net.setPreferableBackend(cv::dnn::DNN_BACKEND_OPENCV);
         net.setPreferableTarget(cv::dnn::DNN_TARGET_CPU);
     }

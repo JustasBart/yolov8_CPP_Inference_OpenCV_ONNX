@@ -7,7 +7,7 @@ MainWindow::MainWindow(QWidget *parent) :
 {
     ui->setupUi(this);
 
-    QString projectBasePath = QDir::homePath() + "/yolov8_CPP_Inference_OpenCV_ONNX";
+    std::string projectBasePath = QDir::homePath().toStdString() + "/yolov8_CPP_Inference_OpenCV_ONNX";
 
     bool runOnGPU = true;
 
@@ -16,7 +16,7 @@ MainWindow::MainWindow(QWidget *parent) :
 
     QFileDialog dialog(this);
     dialog.setWindowTitle("Select your images for inferencing");
-    dialog.setDirectory(projectBasePath + "/source/data");
+    dialog.setDirectory(QString::fromStdString(projectBasePath) + "/source/data");
     dialog.setFileMode(QFileDialog::ExistingFiles);
     dialog.setNameFilter("images (*.jpg *.jpeg *.png *.bmp)");
 
@@ -29,10 +29,10 @@ MainWindow::MainWindow(QWidget *parent) :
         cv::Mat frame = cv::imread(fileNames[i].toStdString());
 
         // Inference starts here...
-        QVector<Detection> output = inf.runInference(frame);
+        std::vector<Detection> output = inf.runInference(frame);
 
         int detections = output.size();
-        qDebug() << "Number of detections:" << detections;
+        std::cout << "Number of detections:" << detections << std::endl;
 
         for (int i = 0; i < detections; ++i)
         {
@@ -42,7 +42,7 @@ MainWindow::MainWindow(QWidget *parent) :
             cv::Scalar color = detection.color;
 
             cv::rectangle(frame, box, color, 2);
-            cv::putText(frame, (detection.className.toStdString() + ' ' + std::to_string(detection.confidence).substr(0, 4)), cv::Point(box.x, box.y - 5), cv::FONT_HERSHEY_SIMPLEX, 1, color, 3);
+            cv::putText(frame, (detection.className + ' ' + std::to_string(detection.confidence).substr(0, 4)), cv::Point(box.x, box.y - 5), cv::FONT_HERSHEY_SIMPLEX, 1, color, 3);
         }
         // Inference ends here...
 
