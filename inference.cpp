@@ -28,14 +28,12 @@ QVector<Detection> Inference::runInference(const cv::Mat &input)
     int dimensions = outputs[0].size[2];
 
     bool yolov8 = false;
-    if (dimensions > rows)
+    if (dimensions % 2 == 0)
     {
         yolov8 = true;
         rows = outputs[0].size[2];
         dimensions = outputs[0].size[1];
-    }
-    if (yolov8)
-    {
+
         outputs[0] = outputs[0].reshape(1, dimensions);
         cv::transpose(outputs[0], outputs[0]);
     }
