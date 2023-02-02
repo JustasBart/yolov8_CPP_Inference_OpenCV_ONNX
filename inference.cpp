@@ -27,25 +27,15 @@ QVector<Detection> Inference::runInference(const cv::Mat &input)
     if (dimensions > rows)
     {
         yolov8 = true;
-
-        int temp = rows;
-        rows = dimensions;
-        dimensions = temp;
+        rows = outputs[0].size[2];
+        dimensions = outputs[0].size[1];
     }
-
-
-
     if (yolov8)
     {
         outputs[0] = outputs[0].reshape(1, dimensions);
         cv::transpose(outputs[0], outputs[0]);
-
     }
-
     float *data = (float *)outputs[0].data;
-
-    // qDebug() << "Dimensions:" << dimensions;
-    // qDebug() << "Rows:" << rows;
 
     float x_factor = input.cols / modelShape.width;
     float y_factor = input.rows / modelShape.height;
@@ -60,10 +50,7 @@ QVector<Detection> Inference::runInference(const cv::Mat &input)
 
         if (confidence >= modelConfidenseThreshold)
         {
-            float *classes_scores = nullptr;
-
-            if (yolov8) classes_scores = data + 4;
-            else        classes_scores = data + 5;
+            float *classes_scores = yolov8 ? data+4 : data+5;
 
             cv::Mat scores(1, classes.size(), CV_32FC1, classes_scores);
             cv::Point class_id;
@@ -98,7 +85,6 @@ QVector<Detection> Inference::runInference(const cv::Mat &input)
     cv::dnn::NMSBoxes(boxes, confidences, modelScoreThreshold, modelNMSThreshold, nms_result);
 
     QVector<Detection> detections{};
-
     for (unsigned long i = 0; i < nms_result.size(); ++i)
     {
         int idx = nms_result[i];

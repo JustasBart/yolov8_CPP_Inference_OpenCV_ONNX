@@ -43,9 +43,9 @@ private:
     QVector<QString> classes{};
     cv::Size2f modelShape{};
 
-    float modelConfidenseThreshold  {0.3};
-    float modelScoreThreshold       {0.4};
-    float modelNMSThreshold         {0.4};
+    float modelConfidenseThreshold  {0.25};
+    float modelScoreThreshold       {0.45};
+    float modelNMSThreshold         {0.50};
 
     cv::dnn::Net net;
 };
