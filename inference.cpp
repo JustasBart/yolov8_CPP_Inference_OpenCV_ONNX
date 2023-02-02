@@ -6,15 +6,19 @@ Inference::Inference(const QString &onnxModelPath, const cv::Size2f &modelInputS
     modelShape = modelInputShape;
     classesPath = classesTxtFile;
     cudaEnabled = runWithCuda;
+
     loadOnnxNetwork();
     loadClassesFromFile();
 }
 
 QVector<Detection> Inference::runInference(const cv::Mat &input)
 {
-    cv::Mat blob;
+    cv::Mat modelInput = input;
+    if (letterBoxForSquare && modelShape.width == modelShape.height)
+        modelInput = formatToSquare(modelInput);
 
-    cv::dnn::blobFromImage(input, blob, 1.0/255.0, modelShape, cv::Scalar(), true, false);
+    cv::Mat blob;
+    cv::dnn::blobFromImage(modelInput, blob, 1.0/255.0, modelShape, cv::Scalar(), true, false);
     net.setInput(blob);
 
     std::vector<cv::Mat> outputs;
@@ -37,8 +41,8 @@ QVector<Detection> Inference::runInference(const cv::Mat &input)
     }
     float *data = (float *)outputs[0].data;
 
-    float x_factor = input.cols / modelShape.width;
-    float y_factor = input.rows / modelShape.height;
+    float x_factor = modelInput.cols / modelShape.width;
+    float y_factor = modelInput.rows / modelShape.height;
 
     std::vector<int> class_ids;
     std::vector<float> confidences;
@@ -134,4 +138,14 @@ void Inference::loadOnnxNetwork()
         net.setPreferableBackend(cv::dnn::DNN_BACKEND_OPENCV);
         net.setPreferableTarget(cv::dnn::DNN_TARGET_CPU);
     }
+}
+
+cv::Mat Inference::formatToSquare(const cv::Mat &source)
+{
+    int col = source.cols;
+    int row = source.rows;
+    int _max = MAX(col, row);
+    cv::Mat result = cv::Mat::zeros(_max, _max, CV_8UC3);
+    source.copyTo(result(cv::Rect(0, 0, col, row)));
+    return result;
 }

@@ -36,16 +36,18 @@ private:
     void loadOnnxNetwork();
     cv::Mat formatToSquare(const cv::Mat &source);
 
-    QString modelPath;
-    QString classesPath;
-    bool cudaEnabled;
+    QString modelPath{};
+    QString classesPath{};
+    bool cudaEnabled{};
 
     QVector<QString> classes{};
     cv::Size2f modelShape{};
 
-    float modelConfidenseThreshold  {0.25};
-    float modelScoreThreshold       {0.45};
-    float modelNMSThreshold         {0.50};
+    float modelConfidenseThreshold {0.25};
+    float modelScoreThreshold      {0.45};
+    float modelNMSThreshold        {0.50};
+
+    bool letterBoxForSquare = true;
 
     cv::dnn::Net net;
 };
