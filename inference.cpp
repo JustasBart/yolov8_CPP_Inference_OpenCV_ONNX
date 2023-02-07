@@ -28,7 +28,9 @@ std::vector<Detection> Inference::runInference(const cv::Mat &input)
     int dimensions = outputs[0].size[2];
 
     bool yolov8 = false;
-    if (dimensions % 2 == 0)
+    // yolov5 has an output of shape (batchSize, 25200, 85) (Num classes + box[x,y,w,h] + confidence[c])
+    // yolov8 has an output of shape (batchSize, 84,  8400) (Num classes + box[x,y,w,h])
+    if (dimensions > rows) // Check if the shape[2] is more than shape[1] (yolov8)
     {
         yolov8 = true;
         rows = outputs[0].size[2];
@@ -77,7 +79,7 @@ std::vector<Detection> Inference::runInference(const cv::Mat &input)
                 boxes.push_back(cv::Rect(left, top, width, height));
             }
         }
-        else
+        else // yolov5
         {
             float confidence = data[4];
 
