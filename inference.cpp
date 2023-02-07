@@ -48,21 +48,19 @@ std::vector<Detection> Inference::runInference(const cv::Mat &input)
 
     for (int i = 0; i < rows; ++i)
     {
-        float confidence = data[4];
-
-        if (confidence >= modelConfidenseThreshold)
+        if (yolov8)
         {
-            float *classes_scores = yolov8 ? data+4 : data+5;
+            float *classes_scores = data+4;
 
             cv::Mat scores(1, classes.size(), CV_32FC1, classes_scores);
             cv::Point class_id;
-            double max_class_score;
+            double maxClassScore;
 
-            minMaxLoc(scores, 0, &max_class_score, 0, &class_id);
+            minMaxLoc(scores, 0, &maxClassScore, 0, &class_id);
 
-            if (max_class_score > modelScoreThreshold)
+            if (maxClassScore > modelScoreThreshold)
             {
-                confidences.push_back(confidence);
+                confidences.push_back(maxClassScore);
                 class_ids.push_back(class_id.x);
 
                 float x = data[0];
@@ -77,6 +75,40 @@ std::vector<Detection> Inference::runInference(const cv::Mat &input)
                 int height = int(h * y_factor);
 
                 boxes.push_back(cv::Rect(left, top, width, height));
+            }
+        }
+        else
+        {
+            float confidence = data[4];
+
+            if (confidence >= modelConfidenseThreshold)
+            {
+                float *classes_scores = data+5;
+
+                cv::Mat scores(1, classes.size(), CV_32FC1, classes_scores);
+                cv::Point class_id;
+                double max_class_score;
+
+                minMaxLoc(scores, 0, &max_class_score, 0, &class_id);
+
+                if (max_class_score > modelScoreThreshold)
+                {
+                    confidences.push_back(confidence);
+                    class_ids.push_back(class_id.x);
+
+                    float x = data[0];
+                    float y = data[1];
+                    float w = data[2];
+                    float h = data[3];
+
+                    int left = int((x - 0.5 * w) * x_factor);
+                    int top = int((y - 0.5 * h) * y_factor);
+
+                    int width = int(w * x_factor);
+                    int height = int(h * y_factor);
+
+                    boxes.push_back(cv::Rect(left, top, width, height));
+                }
             }
         }
 
