@@ -43,7 +43,7 @@ private:
     float modelScoreThreshold      {0.45};
     float modelNMSThreshold        {0.50};
 
-    bool letterBoxForSquare = false;
+    bool letterBoxForSquare = true;
 
     cv::dnn::Net net;
 };

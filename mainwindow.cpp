@@ -11,6 +11,16 @@ MainWindow::MainWindow(QWidget *parent) :
 
     bool runOnGPU = true;
 
+    //
+    // Pass in either:
+    //
+    // "/source/models/yolov8s.onnx"
+    // or
+    // "/source/models/yolov5s.onnx"
+    //
+    // To run Inference with yolov8/yolov5 (ONNX)
+    //
+
     Inference inf(projectBasePath + "/source/models/yolov8s.onnx", cv::Size(640, 480),
                   projectBasePath + "/source/classes/classes.txt", runOnGPU);
 
