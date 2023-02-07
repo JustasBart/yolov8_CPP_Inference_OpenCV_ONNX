@@ -51,8 +51,16 @@ MainWindow::MainWindow(QWidget *parent) :
             cv::Rect box = detection.box;
             cv::Scalar color = detection.color;
 
+            // Detection box
             cv::rectangle(frame, box, color, 2);
-            cv::putText(frame, (detection.className + ' ' + std::to_string(detection.confidence).substr(0, 4)), cv::Point(box.x, box.y - 5), cv::FONT_HERSHEY_SIMPLEX, 1, color, 3);
+
+            // Detection box text
+            std::string classString = detection.className + ' ' + std::to_string(detection.confidence).substr(0, 4);
+            cv::Size textSize = cv::getTextSize(classString, cv::FONT_HERSHEY_DUPLEX, 1, 2, 0);
+            cv::Rect textBox(box.x, box.y - 40, textSize.width + 10, textSize.height + 20);
+
+            cv::rectangle(frame, textBox, color, cv::FILLED);
+            cv::putText(frame, classString, cv::Point(box.x + 5, box.y - 10), cv::FONT_HERSHEY_DUPLEX, 1, cv::Scalar(0, 0, 0), 2, 0);
         }
         // Inference ends here...
 
