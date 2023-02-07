@@ -129,7 +129,7 @@ std::vector<Detection> Inference::runInference(const cv::Mat &input)
 
         std::random_device rd;
         std::mt19937 gen(rd());
-        std::uniform_int_distribution<int> dis(0, 255);
+        std::uniform_int_distribution<int> dis(100, 255);
         result.color = cv::Scalar(dis(gen),
                                   dis(gen),
                                   dis(gen));
