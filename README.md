@@ -10,7 +10,7 @@ Edit the **main.cpp** to change the **projectBasePath** to match your user.
 mkdir build
 cd build
 cmake ..
-mak
+make
 ./Yolov8CPPInference
 ```
 
