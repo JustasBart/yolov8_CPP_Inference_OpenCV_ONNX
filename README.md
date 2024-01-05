@@ -1,4 +1,6 @@
 # yolov8/yolov5 Inference C++
+### NOTE:
+As been discovered by several people by now this seems to work with OpenCV 4.7.0 (And earlier) but the GPU inference may not work for OpenCV 4.8.0 and newer.
 
 Usage:
 ```
